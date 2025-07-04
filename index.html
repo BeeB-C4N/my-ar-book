@@ -24,6 +24,19 @@
         height: auto;
         transform: translate(-50%, -50%);
         z-index: 1;
+        cursor: pointer;
+      }
+
+      /* ジャンプ用アニメーション */
+      @keyframes jump {
+        0%   { transform: translate(-50%, -50%) scale(1); }
+        30%  { transform: translate(-50%, -60%) scale(1.1); }
+        50%  { transform: translate(-50%, -70%) scale(1.05); }
+        100% { transform: translate(-50%, -50%) scale(1); }
+      }
+
+      .jump {
+        animation: jump 0.6s ease;
       }
     </style>
   </head>
@@ -33,14 +46,27 @@
 
     <script>
       const video = document.getElementById('camera');
-      navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-        .then((stream) => {
-          video.srcObject = stream;
-        })
-        .catch((err) => {
-          console.error("カメラの取得に失敗しました:", err);
-          alert("カメラの利用を許可してください。");
-        });
+      const overlay = document.getElementById('overlay');
+
+      // カメラ起動
+      navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { exact: "environment" } },
+        audio: false
+      })
+      .then((stream) => {
+        video.srcObject = stream;
+      })
+      .catch((err) => {
+        console.error("カメラの取得に失敗しました:", err);
+        alert("カメラの利用を許可してください。");
+      });
+
+      // クリックでジャンプアニメーション
+      overlay.addEventListener('click', () => {
+        overlay.classList.remove('jump'); // いったん消す（連打対応）
+        void overlay.offsetWidth;         // 再描画トリガー（おまじない）
+        overlay.classList.add('jump');
+      });
     </script>
   </body>
 </html>
