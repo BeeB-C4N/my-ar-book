@@ -1,72 +1,30 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-    <title>カメラテスト</title>
-    <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-      }
-      #camera {
-        position: absolute;
-        width: 100vw;
-        height: 100vh;
-        object-fit: cover;
-        z-index: 0;
-      }
-      #overlay {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 200px;
-        height: auto;
-        transform: translate(-50%, -50%);
-        z-index: 1;
-        cursor: pointer;
-      }
-
-      /* ジャンプ用アニメーション */
-      @keyframes jump {
-        0%   { transform: translate(-50%, -50%) scale(1); }
-        30%  { transform: translate(-50%, -60%) scale(1.1); }
-        50%  { transform: translate(-50%, -70%) scale(1.05); }
-        100% { transform: translate(-50%, -50%) scale(1); }
-      }
-
-      .jump {
-        animation: jump 0.6s ease;
-      }
-    </style>
+    <meta charset="utf-8">
+    <title>マーカーAR</title>
+    <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.4/dist/mindar-image-aframe.prod.js"></script>
+    <style>body { margin: 0; }</style>
   </head>
   <body>
-    <video id="camera" autoplay playsinline></video>
-    <img id="overlay" src="Lemon.jpg" alt="レモン画像" />
+    <a-scene mindar-image="imageTargetSrc: apple.mind;" 
+             embedded 
+             color-space="sRGB" 
+             renderer="precision: mediump;" 
+             vr-mode-ui="enabled: false" 
+             device-orientation-permission-ui="enabled: true">
 
-    <script>
-      const video = document.getElementById('camera');
-      const overlay = document.getElementById('overlay');
+      <a-assets>
+        <img id="myimage" src="Lemon.jpg" />
+      </a-assets>
 
-      // カメラ起動
-      navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { exact: "environment" } },
-        audio: false
-      })
-      .then((stream) => {
-        video.srcObject = stream;
-      })
-      .catch((err) => {
-        console.error("カメラの取得に失敗しました:", err);
-        alert("カメラの利用を許可してください。");
-      });
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      // クリックでジャンプアニメーション
-      overlay.addEventListener('click', () => {
-        overlay.classList.remove('jump'); // いったん消す（連打対応）
-        void overlay.offsetWidth;         // 再描画トリガー（おまじない）
-        overlay.classList.add('jump');
-      });
-    </script>
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-plane src="#myimage" position="0 0 0" height="1" width="1"></a-plane>
+      </a-entity>
+
+    </a-scene>
   </body>
 </html>
