@@ -1,30 +1,103 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>マーカーAR</title>
-    <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.4/dist/mindar-image-aframe.prod.js"></script>
-    <style>body { margin: 0; }</style>
-  </head>
-  <body>
-    <a-scene mindar-image="imageTargetSrc: apple.mind;" 
-             embedded 
-             color-space="sRGB" 
-             renderer="precision: mediump;" 
-             vr-mode-ui="enabled: false" 
-             device-orientation-permission-ui="enabled: true">
+<head>
+  <meta charset="utf-8">
+  <title>カメラ＋シャッター</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
 
-      <a-assets>
-        <img id="myimage" src="Lemon.jpg" />
-      </a-assets>
+    #camera {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 0;
+    }
 
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    #overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 200px;
+      height: auto;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+      cursor: pointer;
+    }
 
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-plane src="#myimage" position="0 0 0" height="1" width="1"></a-plane>
-      </a-entity>
+    #shutter-button {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      font-size: 18px;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      z-index: 2;
+    }
 
-    </a-scene>
-  </body>
+    #snapshot {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <video id="camera" autoplay playsinline></video>
+  <img id="overlay" src="Lemon.jpg" alt="レモン画像" />
+  <button id="shutter-button">📸 シャッター</button>
+  <canvas id="snapshot"></canvas>
+
+  <script>
+    const video = document.getElementById('camera');
+    const canvas = document.getElementById('snapshot');
+    const button = document.getElementById('shutter-button');
+
+    // アウトカメラを起動
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { exact: "environment" } },
+      audio: false
+    })
+    .then((stream) => {
+      video.srcObject = stream;
+    })
+    .catch((err) => {
+      console.error("カメラの取得に失敗しました:", err);
+      alert("カメラの利用を許可してください。");
+    });
+
+    // シャッターを押すとcanvasに描画して保存
+    button.addEventListener('click', () => {
+      const width = video.videoWidth;
+      const height = video.videoHeight;
+
+      // canvasサイズを設定
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+
+      // 背景のカメラ映像
+      ctx.drawImage(video, 0, 0, width, height);
+
+      // レモン画像を重ねる（位置・サイズ調整）
+      const lemon = document.getElementById('overlay');
+      const lemonX = width / 2 - lemon.width / 2;
+      const lemonY = height / 2 - lemon.height / 2;
+      ctx.drawImage(lemon, lemonX, lemonY, lemon.width, lemon.height);
+
+      // ダウンロードリンクを作成
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png');
+      link.download = 'snapshot.png';
+      link.click();
+    });
+  </script>
+</body>
 </html>
