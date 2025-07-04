@@ -1,23 +1,46 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
-    <title>ARえほん</title>
-    <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.4/dist/mindar-image-aframe.prod.js"></script>
-    <style>body { margin: 0; }</style>
+    <meta charset="utf-8" />
+    <title>カメラテスト</title>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      #camera {
+        position: absolute;
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+        z-index: 0;
+      }
+      #overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 200px;
+        height: auto;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+      }
+    </style>
   </head>
   <body>
-    <a-scene mindar-image="imageTargetSrc: apple.mind;" embedded color-space="sRGB" renderer="precision: mediump;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: true">
-      <a-assets>
-        <img id="myimage" src="Lemon.jpg" />
-      </a-assets>
+    <video id="camera" autoplay playsinline></video>
+    <img id="overlay" src="Lemon.jpg" alt="レモン画像" />
 
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-plane src="#myimage" position="0 0 0" height="1" width="1"></a-plane>
-      </a-entity>
-    </a-scene>
+    <script>
+      const video = document.getElementById('camera');
+      navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        .then((stream) => {
+          video.srcObject = stream;
+        })
+        .catch((err) => {
+          console.error("カメラの取得に失敗しました:", err);
+          alert("カメラの利用を許可してください。");
+        });
+    </script>
   </body>
 </html>
